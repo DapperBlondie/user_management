@@ -1,5 +1,5 @@
 # User Management System
-Just for show a way for single uploading file and also for multiple files
+Just for show a way for single file uploading, also for multiple files
 
 ## Single Uploading
 
