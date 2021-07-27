@@ -1,5 +1,7 @@
 # User Management System
-Just for show a way for single file uploading, also for multiple files
+Someone gave me a little task to show my abilities and this repo just for that purposes.
+Just a way for single file uploading, also for multiple files.
+I skipped other parts because, they are sooo boring.
 
 ## Single Uploading
 
