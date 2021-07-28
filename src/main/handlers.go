@@ -156,6 +156,7 @@ func (h *HandlerRepo) UserInfoHandler(w http.ResponseWriter, r *http.Request)  {
 		http.Redirect(w, r, "/status", http.StatusBadRequest)
 		return
 	}
+
 	h.Config.SCSManager.Put(r.Context(), "url", r.UserAgent())
 	var userInfo = &UserPayload{}
 	err := json.NewDecoder(r.Body).Decode(&userInfo)
