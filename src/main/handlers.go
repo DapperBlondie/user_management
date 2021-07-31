@@ -14,35 +14,37 @@ import (
 	"time"
 )
 
-const MAX_UPLOAD_SIZE = 2048*1024
-const MAX_MULTIPLE_SIZE = 5120*1024
+const MAX_UPLOAD_SIZE = 2048 * 1024
+const MAX_MULTIPLE_SIZE = 5120 * 1024
 
 type HandlerRepo struct {
 	Config *models.AppConfig
-	D	   *repo.PostgresDBRepo
+	D      *repo.PostgresDBRepo
 }
 
 type AppStatus struct {
-	Status string
+	Status  string
 	Version string
 }
 
 type UserPayload struct {
-	FirstName    string	`json:"first_name"`
-	LastName     string	`json:"last_name"`
-	DateOfBirth  string	`json:"date_of_birth"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	DateOfBirth string `json:"date_of_birth"`
 }
 
 var handlerRepo *HandlerRepo
 
-func NewHandlerRepo(c *models.AppConfig, d *repo.PostgresDBRepo)  {
+// NewHandlerRepo use for creating a Repository for our DBRepo and application config
+func NewHandlerRepo(c *models.AppConfig, d *repo.PostgresDBRepo) {
 	handlerRepo = &HandlerRepo{
 		Config: c,
 		D:      d,
 	}
 }
 
-func (h *HandlerRepo) ImageUploadingHandler(w http.ResponseWriter, r *http.Request)  {
+// ImageUploadingHandler use for handling a POST request including a *.png or *.jpeg file
+func (h *HandlerRepo) ImageUploadingHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -71,7 +73,7 @@ func (h *HandlerRepo) ImageUploadingHandler(w http.ResponseWriter, r *http.Reque
 	}(file)
 
 	dst, err := os.Create(fmt.Sprintf("./src/static/images/%s%d%s",
-		r.Form.Get("first_name"),time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+		r.Form.Get("first_name"), time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -95,13 +97,14 @@ func (h *HandlerRepo) ImageUploadingHandler(w http.ResponseWriter, r *http.Reque
 	return
 }
 
-func (h *HandlerRepo) MultipleImageUploadingHandler(w http.ResponseWriter, r *http.Request)  {
+// MultipleImageUploadingHandler use for handling a POST request including multiple files
+func (h *HandlerRepo) MultipleImageUploadingHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	r.Body = http.MaxBytesReader(w, r.Body, MAX_MULTIPLE_SIZE) // Use for limiting the r.Body
+	r.Body = http.MaxBytesReader(w, r.Body, MAX_MULTIPLE_SIZE)      // Use for limiting the r.Body
 	if err := r.ParseMultipartForm(MAX_MULTIPLE_SIZE); err != nil { // Parse form have multipart/form-data into it
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -110,7 +113,7 @@ func (h *HandlerRepo) MultipleImageUploadingHandler(w http.ResponseWriter, r *ht
 
 	files := r.MultipartForm.File["images_file"] // Use for getting the all files in the request
 
-	for _, fileHeader := range files{
+	for _, fileHeader := range files {
 		if fileHeader.Size == MAX_UPLOAD_SIZE {
 			log.Println("Uploaded file is too big")
 			http.Error(w, "Uploaded file is too big", http.StatusBadRequest)
@@ -131,7 +134,7 @@ func (h *HandlerRepo) MultipleImageUploadingHandler(w http.ResponseWriter, r *ht
 		}(uFile)
 
 		uF, err := os.Create(fmt.Sprintf("./src/static/images/%s%d%s",
-			r.Form.Get("first_name"),time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+			r.Form.Get("first_name"), time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
 		defer func(uF *os.File) {
 			err = uF.Close()
 			if err != nil {
@@ -151,7 +154,8 @@ func (h *HandlerRepo) MultipleImageUploadingHandler(w http.ResponseWriter, r *ht
 	return
 }
 
-func (h *HandlerRepo) UserInfoHandler(w http.ResponseWriter, r *http.Request)  {
+// UserInfoHandler use for getting the userInfo from the request
+func (h *HandlerRepo) UserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		http.Redirect(w, r, "/status", http.StatusBadRequest)
 		return
@@ -168,10 +172,10 @@ func (h *HandlerRepo) UserInfoHandler(w http.ResponseWriter, r *http.Request)  {
 	return
 }
 
-func (h *HandlerRepo) Status(w http.ResponseWriter, r *http.Request)  {
+func (h *HandlerRepo) Status(w http.ResponseWriter, r *http.Request) {
 	currentStatus := &AppStatus{
-		Status:      "Available",
-		Version:     "1.0.0",
+		Status:  "Available",
+		Version: "1.0.0",
 	}
 
 	out, err := json.MarshalIndent(currentStatus, "", "\t")
